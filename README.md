@@ -24,6 +24,8 @@ $ ./mvnw package
 $ java -jar target/mads-todolist-inicial-0.0.1-SNAPSHOT.jar 
 ```
 
+Trello: https://trello.com/b/IREzSXoz
+
 Una vez lanzada la aplicación puedes abrir un navegador y probar la página de inicio:
 
 - [http://localhost:8080/login](http://localhost:8080/login)

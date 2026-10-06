@@ -153,4 +153,40 @@ public class UsuarioServiceTest {
         assertThat(usuario.getEmail()).isEqualTo("user@ua");
         assertThat(usuario.getNombre()).isEqualTo("Usuario Ejemplo");
     }
+
+    @Test
+    public void servicioRegistroAdministrador() {
+
+        assertThat(usuarioService.existeAdministrador()).isFalse();
+
+
+        UsuarioData admin = new UsuarioData();
+        admin.setEmail("admin@ua");
+        admin.setPassword("123");
+        admin.setAdmin(true);
+        UsuarioData adminNuevo = usuarioService.registrar(admin);
+
+
+        assertThat(usuarioService.findById(adminNuevo.getId()).isAdmin()).isTrue();
+        assertThat(usuarioService.existeAdministrador()).isTrue();
+    }
+
+    @Test
+    public void servicioRegistroSegundoAdministradorLanzaExcepcion() {
+
+        UsuarioData admin = new UsuarioData();
+        admin.setEmail("admin@ua");
+        admin.setPassword("123");
+        admin.setAdmin(true);
+        usuarioService.registrar(admin);
+
+        UsuarioData admin2 = new UsuarioData();
+        admin2.setEmail("admin2@ua");
+        admin2.setPassword("123");
+        admin2.setAdmin(true);
+
+        Assertions.assertThrows(UsuarioServiceException.class, () -> {
+            usuarioService.registrar(admin2);
+        });
+    }
 }

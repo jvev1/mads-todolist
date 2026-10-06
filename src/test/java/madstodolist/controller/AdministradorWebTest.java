@@ -78,7 +78,7 @@ public class AdministradorWebTest {
         addAdminBD();
 
         this.mockMvc.perform(post("/login")
-                        .param("email", "admin@ua")
+                        .param("eMail", "admin@ua")
                         .param("password", "123"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/registrados"));

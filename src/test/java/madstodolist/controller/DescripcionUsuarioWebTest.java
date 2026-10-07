@@ -91,4 +91,17 @@ public class DescripcionUsuarioWebTest {
                 .andExpect(status().reason(containsString("No tienes permisos suficientes")));
     }
 
+    @Test
+    public void descripcionNoAccesibleSinLogin() throws Exception {
+        // GIVEN
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("otro@ua.es");
+        usuario.setPassword("123");
+        usuario = usuarioService.registrar(usuario);
+        when(managerUserSession.usuarioLogeado()).thenReturn(null);
+
+        // WHEN, THEN
+        this.mockMvc.perform(get("/registrados/" + usuario.getId()))
+                .andExpect(status().isUnauthorized());
+    }
 }

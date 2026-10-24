@@ -58,7 +58,7 @@ public class ListadoUsuariosWebTest {
     @Test
     public void listadoNoAccesibleParaUsuarioNoAdministrador() throws Exception {
         // GIVEN
-        UsuarioData usuario = addUsuarioBD("normal@umh.es", true);
+        UsuarioData usuario = addUsuarioBD("normal@umh.es", false);
         when(managerUserSession.usuarioLogeado()).thenReturn(usuario.getId());
 
         // WHEN, THEN

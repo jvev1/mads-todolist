@@ -5,7 +5,7 @@ on: push
 jobs:
   container-job:
     runs-on: ubuntu-latest
-    container: openjdk:8-jdk-alpine
+    container: eclipse-temurin:8-jdk
     services:
       # Etiqueta usada para acceder al contenedor del servicio
       postgres:
@@ -24,7 +24,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Launch tests with Maven
         run:  ./mvnw test -D spring.profiles.active=postgres
         env:

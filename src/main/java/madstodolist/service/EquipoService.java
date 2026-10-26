@@ -37,7 +37,8 @@ public class EquipoService {
     @Transactional(readOnly = true)
     public EquipoData recuperarEquipo(Long id) {
         Equipo equipo = equipoRepository.findById(id).orElse(null);
-        if (equipo == null) return null;
+        if (equipo == null)
+            throw new EquipoServiceException("No existe el equipo con id " + id);
         else {
             return modelMapper.map(equipo, EquipoData.class);
         }
@@ -54,13 +55,19 @@ public class EquipoService {
     @Transactional
     public void añadirUsuarioAEquipo(Long idEquipo, Long idUsuario) {
         Equipo equipo = equipoRepository.findById(idEquipo).orElse(null);
+        if (equipo == null)
+            throw new EquipoServiceException("No existe el equipo con id " + idEquipo);
         Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+        if (usuario == null)
+            throw new EquipoServiceException("No existe el usuario con id " + idUsuario);
         equipo.addUsuario(usuario);
     }
 
     @Transactional(readOnly = true)
     public List<UsuarioData> usuariosEquipo(Long id) {
         Equipo equipo = equipoRepository.findById(id).orElse(null);
+        if (equipo == null)
+            throw new EquipoServiceException("No existe el equipo con id " + id);
         // Hacemos uso de Java Stream API para mapear la lista de entidades a DTOs.
         return equipo.getUsuarios().stream()
                 .map(usuario -> modelMapper.map(usuario, UsuarioData.class))
@@ -70,6 +77,8 @@ public class EquipoService {
     @Transactional(readOnly = true)
     public List<EquipoData> equiposUsuario(Long idUsuario) {
         Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+        if (usuario == null)
+            throw new EquipoServiceException("No existe el usuario con id " + idUsuario);
         return usuario.getEquipos().stream()
                 .map(equipo -> modelMapper.map(equipo, EquipoData.class))
                 .collect(Collectors.toList());

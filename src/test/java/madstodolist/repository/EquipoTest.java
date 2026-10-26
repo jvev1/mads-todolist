@@ -3,6 +3,7 @@ package madstodolist.repository;
 import madstodolist.model.Equipo;
 import madstodolist.model.Usuario;
 import org.junit.jupiter.api.Test;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
@@ -101,5 +102,20 @@ public class EquipoTest {
         assertThat(equipo.getUsuarios()).contains(usuario);
         assertThat(usuario.getEquipos()).hasSize(1);
         assertThat(usuario.getEquipos()).contains(equipo);
+    }
+
+    @Test
+    @Transactional
+    public void comprobarFindAll() {
+        // GIVEN
+        // Dos equipos en la base de datos
+        equipoRepository.save(new Equipo("Proyecto 2"));
+        equipoRepository.save(new Equipo("Proyecto 3"));
+
+        // WHEN
+        List<Equipo> equipos = equipoRepository.findAll();
+
+        // THEN
+        assertThat(equipos).hasSize(2);
     }
 }

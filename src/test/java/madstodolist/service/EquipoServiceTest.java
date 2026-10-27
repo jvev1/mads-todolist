@@ -81,6 +81,22 @@ public class EquipoServiceTest {
     }
 
     @Test
+    public void añadirUsuarioYaPerteneceAEquipoLanzaExcepcion() {
+        // GIVEN
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("user@ua");
+        usuario.setPassword("123");
+        UsuarioData usuarioBd = usuarioService.registrar(usuario);
+        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuarioBd.getId());
+
+        // WHEN, THEN
+        // Volver a añadirlo
+        assertThatThrownBy(() -> equipoService.añadirUsuarioAEquipo(equipo.getId(), usuarioBd.getId()))
+                .isInstanceOf(EquipoServiceException.class);
+    }
+
+    @Test
     public void recuperarEquiposDeUsuario() {
         // GIVEN
         // Un usuario y dos equipos en la base de datos

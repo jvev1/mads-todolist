@@ -62,6 +62,8 @@ public class EquipoService {
         Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
         if (usuario == null)
             throw new EquipoServiceException("No existe el usuario con id " + idUsuario);
+        if (equipo.getUsuarios().contains(usuario))
+            throw new EquipoServiceException("El usuario " + idUsuario + " ya pertenece al equipo " + idEquipo);
         equipo.addUsuario(usuario);
     }
 

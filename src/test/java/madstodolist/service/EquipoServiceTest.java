@@ -113,6 +113,26 @@ public class EquipoServiceTest {
     }
 
     @Test
+    public void eliminarUsuarioDeEquipoExcepciones() {
+        // No existe ni el equipo ni el usuario
+        assertThatThrownBy(() -> equipoService.eliminarUsuarioDeEquipo(1L, 1L))
+                .isInstanceOf(EquipoServiceException.class);
+
+        // Existe el equipo pero no el usuario
+        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+        assertThatThrownBy(() -> equipoService.eliminarUsuarioDeEquipo(equipo.getId(), 1L))
+                .isInstanceOf(EquipoServiceException.class);
+
+        // Existen los dos, pero el usuario no pertenece al equipo
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("user@ua");
+        usuario.setPassword("123");
+        UsuarioData usuarioBd = usuarioService.registrar(usuario);
+        assertThatThrownBy(() -> equipoService.eliminarUsuarioDeEquipo(equipo.getId(), usuarioBd.getId()))
+                .isInstanceOf(EquipoServiceException.class);
+    }
+
+    @Test
     public void comprobarExcepciones() {
         // Comprobamos las excepciones lanzadas por los métodos
         // recuperarEquipo, añadirUsuarioAEquipo, usuariosEquipo y equiposUsuario

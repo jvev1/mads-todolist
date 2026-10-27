@@ -95,6 +95,24 @@ public class EquipoServiceTest {
     }
 
     @Test
+    public void eliminarUsuarioDeEquipo() {
+        // GIVEN
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("user@ua");
+        usuario.setPassword("123");
+        usuario = usuarioService.registrar(usuario);
+        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuario.getId());
+
+        // WHEN
+        equipoService.eliminarUsuarioDeEquipo(equipo.getId(), usuario.getId());
+
+        // THEN
+        assertThat(equipoService.usuariosEquipo(equipo.getId())).isEmpty();
+        assertThat(equipoService.equiposUsuario(usuario.getId())).isEmpty();
+    }
+
+    @Test
     public void comprobarExcepciones() {
         // Comprobamos las excepciones lanzadas por los métodos
         // recuperarEquipo, añadirUsuarioAEquipo, usuariosEquipo y equiposUsuario

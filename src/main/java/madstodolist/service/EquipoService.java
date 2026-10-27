@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,6 +48,15 @@ public class EquipoService {
         comprobarNombreValido(nuevoNombre);
         equipo.setNombre(nuevoNombre);
         return modelMapper.map(equipo, EquipoData.class);
+    }
+
+    @Transactional
+    public void borrarEquipo(Long idEquipo) {
+        Equipo equipo = getEquipoOrThrow(idEquipo);
+        for (Usuario usuario : new ArrayList<>(equipo.getUsuarios())) {
+            equipo.removeUsuario(usuario);
+        }
+        equipoRepository.delete(equipo);
     }
 
     @Transactional(readOnly = true)

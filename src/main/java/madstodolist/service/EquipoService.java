@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,8 +30,7 @@ public class EquipoService {
 
     @Transactional
     public EquipoData crearEquipo(String nombre) {
-        if (nombre == null || nombre.trim().isEmpty())
-            throw new EquipoServiceException("El nombre del equipo no puede estar vacío");
+        comprobarNombreValido(nombre);
         Equipo equipo = new Equipo(nombre);
         equipo = equipoRepository.save(equipo);
         return modelMapper.map(equipo, EquipoData.class);
@@ -40,6 +40,23 @@ public class EquipoService {
     public EquipoData recuperarEquipo(Long id) {
         Equipo equipo = getEquipoOrThrow(id);
         return modelMapper.map(equipo, EquipoData.class);
+    }
+
+    @Transactional
+    public EquipoData modificarNombreEquipo(Long idEquipo, String nuevoNombre) {
+        Equipo equipo = getEquipoOrThrow(idEquipo);
+        comprobarNombreValido(nuevoNombre);
+        equipo.setNombre(nuevoNombre);
+        return modelMapper.map(equipo, EquipoData.class);
+    }
+
+    @Transactional
+    public void borrarEquipo(Long idEquipo) {
+        Equipo equipo = getEquipoOrThrow(idEquipo);
+        for (Usuario usuario : new ArrayList<>(equipo.getUsuarios())) {
+            equipo.removeUsuario(usuario);
+        }
+        equipoRepository.delete(equipo);
     }
 
     @Transactional(readOnly = true)
@@ -83,6 +100,11 @@ public class EquipoService {
         return usuario.getEquipos().stream()
                 .map(equipo -> modelMapper.map(equipo, EquipoData.class))
                 .collect(Collectors.toList());
+    }
+
+    private void comprobarNombreValido(String nombre) {
+        if (nombre == null || nombre.trim().isEmpty())
+            throw new EquipoServiceException("El nombre del equipo no puede estar vacío");
     }
 
     private Equipo getEquipoOrThrow(Long idEquipo) {

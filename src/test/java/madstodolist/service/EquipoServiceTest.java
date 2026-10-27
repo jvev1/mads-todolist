@@ -42,6 +42,38 @@ public class EquipoServiceTest {
     }
 
     @Test
+    public void modificarNombreEquipo() {
+        // GIVEN
+        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+
+        // WHEN
+        EquipoData equipoModificado = equipoService.modificarNombreEquipo(equipo.getId(), "Proyecto 2");
+
+        // THEN
+        assertThat(equipoModificado.getNombre()).isEqualTo("Proyecto 2");
+        assertThat(equipoService.recuperarEquipo(equipo.getId()).getNombre()).isEqualTo("Proyecto 2");
+    }
+
+    @Test
+    public void modificarNombreEquipoExcepciones() {
+        // Equipo inexistente
+        assertThatThrownBy(() -> equipoService.modificarNombreEquipo(1L, "Proyecto 2"))
+                .isInstanceOf(EquipoServiceException.class);
+
+        // Nombre vacío, en blanco o nulo
+        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+        assertThatThrownBy(() -> equipoService.modificarNombreEquipo(equipo.getId(), ""))
+                .isInstanceOf(EquipoServiceException.class);
+        assertThatThrownBy(() -> equipoService.modificarNombreEquipo(equipo.getId(), "   "))
+                .isInstanceOf(EquipoServiceException.class);
+        assertThatThrownBy(() -> equipoService.modificarNombreEquipo(equipo.getId(), null))
+                .isInstanceOf(EquipoServiceException.class);
+
+        // El nombre no ha cambiado
+        assertThat(equipoService.recuperarEquipo(equipo.getId()).getNombre()).isEqualTo("Proyecto 1");
+    }
+
+    @Test
     public void listadoEquiposOrdenAlfabetico() {
         // GIVEN
         // Dos equipos en la base de datos
@@ -136,6 +168,41 @@ public class EquipoServiceTest {
         // THEN
         assertThat(equipoService.usuariosEquipo(equipo.getId())).isEmpty();
         assertThat(equipoService.equiposUsuario(usuario.getId())).isEmpty();
+    }
+
+    @Test
+    public void borrarEquipo() {
+        // GIVEN
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("user@ua");
+        usuario.setPassword("123");
+        usuario = usuarioService.registrar(usuario);
+        EquipoData equipo1 = equipoService.crearEquipo("Proyecto 1");
+        EquipoData equipo2 = equipoService.crearEquipo("Proyecto 2");
+        equipoService.añadirUsuarioAEquipo(equipo1.getId(), usuario.getId());
+        equipoService.añadirUsuarioAEquipo(equipo2.getId(), usuario.getId());
+
+        // WHEN
+        equipoService.borrarEquipo(equipo1.getId());
+
+        // THEN
+        assertThatThrownBy(() -> equipoService.recuperarEquipo(equipo1.getId()))
+                .isInstanceOf(EquipoServiceException.class);
+        assertThat(usuarioService.findById(usuario.getId())).isNotNull();
+        List<EquipoData> equiposUsuario = equipoService.equiposUsuario(usuario.getId());
+        assertThat(equiposUsuario).hasSize(1);
+        assertThat(equiposUsuario.get(0).getNombre()).isEqualTo("Proyecto 2");
+    }
+
+    @Test
+    public void borrarEquipoInexistenteLanzaExcepcion() {
+        // GIVEN
+        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+
+        // WHEN, THEN
+        assertThatThrownBy(() -> equipoService.borrarEquipo(equipo.getId() + 1))
+                .isInstanceOf(EquipoServiceException.class);
+        assertThat(equipoService.findAllOrdenadoPorNombre()).hasSize(1);
     }
 
     @Test

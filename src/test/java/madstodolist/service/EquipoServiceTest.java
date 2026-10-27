@@ -55,6 +55,25 @@ public class EquipoServiceTest {
     }
 
     @Test
+    public void modificarNombreEquipoExcepciones() {
+        // Equipo inexistente
+        assertThatThrownBy(() -> equipoService.modificarNombreEquipo(1L, "Proyecto 2"))
+                .isInstanceOf(EquipoServiceException.class);
+
+        // Nombre vacío, en blanco o nulo
+        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+        assertThatThrownBy(() -> equipoService.modificarNombreEquipo(equipo.getId(), ""))
+                .isInstanceOf(EquipoServiceException.class);
+        assertThatThrownBy(() -> equipoService.modificarNombreEquipo(equipo.getId(), "   "))
+                .isInstanceOf(EquipoServiceException.class);
+        assertThatThrownBy(() -> equipoService.modificarNombreEquipo(equipo.getId(), null))
+                .isInstanceOf(EquipoServiceException.class);
+
+        // El nombre no ha cambiado
+        assertThat(equipoService.recuperarEquipo(equipo.getId()).getNombre()).isEqualTo("Proyecto 1");
+    }
+
+    @Test
     public void listadoEquiposOrdenAlfabetico() {
         // GIVEN
         // Dos equipos en la base de datos

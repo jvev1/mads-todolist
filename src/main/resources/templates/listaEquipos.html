@@ -29,6 +29,18 @@
                 </tr>
                 </tbody>
             </table>
+            <a class="btn btn-primary" th:href="@{/equipos/nuevo}">Crear equipo</a>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col">
+            <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${!#strings.isEmpty(mensaje)}">
+                <span th:text="${mensaje}"></span>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
         </div>
     </div>
 </div>

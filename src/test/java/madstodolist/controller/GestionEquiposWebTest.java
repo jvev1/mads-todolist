@@ -18,6 +18,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -106,6 +107,111 @@ public class GestionEquiposWebTest {
                 .andExpect(status().isUnauthorized());
         this.mockMvc.perform(post("/equipos/nuevo")
                         .param("nombre", "Proyecto AAA"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void postUnirmeAñadeUsuarioAlEquipo() throws Exception {
+        // GIVEN
+        UsuarioData usuario = addUsuarioBD("user@umh.es");
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuario.getId());
+
+        // WHEN, THEN
+        this.mockMvc.perform(post("/equipos/" + equipo.getId() + "/unirme"))
+                .andExpect(redirectedUrl("/equipos"))
+                .andExpect(flash().attribute("mensaje", "Te has unido al equipo"));
+
+        assertThat(equipoService.usuariosEquipo(equipo.getId())).hasSize(1);
+    }
+
+    @Test
+    public void postUnirmeYaMiembroMuestraError() throws Exception {
+        // GIVEN
+        UsuarioData usuario = addUsuarioBD("user@umh.es");
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuario.getId());
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuario.getId());
+
+        // WHEN, THEN
+        this.mockMvc.perform(post("/equipos/" + equipo.getId() + "/unirme"))
+                .andExpect(redirectedUrl("/equipos"))
+                .andExpect(flash().attributeExists("error"));
+    }
+
+    @Test
+    public void postSalirEliminaUsuarioDelEquipo() throws Exception {
+        // GIVEN
+        UsuarioData usuario = addUsuarioBD("user@umh.es");
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+        equipoService.añadirUsuarioAEquipo(equipo.getId(), usuario.getId());
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuario.getId());
+
+        // WHEN, THEN
+        this.mockMvc.perform(post("/equipos/" + equipo.getId() + "/salir"))
+                .andExpect(redirectedUrl("/equipos"))
+                .andExpect(flash().attribute("mensaje", "Has salido del equipo"));
+
+        assertThat(equipoService.usuariosEquipo(equipo.getId())).isEmpty();
+    }
+
+    @Test
+    public void postSalirNoMiembroMuestraError() throws Exception {
+        // GIVEN
+        UsuarioData usuario = addUsuarioBD("user@umh.es");
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuario.getId());
+
+        // WHEN, THEN
+        this.mockMvc.perform(post("/equipos/" + equipo.getId() + "/salir"))
+                .andExpect(redirectedUrl("/equipos"))
+                .andExpect(flash().attributeExists("error"));
+    }
+
+    @Test
+    public void unirmeYSalirEquipoInexistenteDevuelveNotFound() throws Exception {
+        // GIVEN
+        UsuarioData usuario = addUsuarioBD("user@umh.es");
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuario.getId());
+
+        // WHEN, THEN
+        this.mockMvc.perform(post("/equipos/1/unirme"))
+                .andExpect(status().isNotFound());
+        this.mockMvc.perform(post("/equipos/1/salir"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void listadoMuestraBotonUnirmeOSalirSegunPertenencia() throws Exception {
+        // GIVEN
+        // Un usuario que pertenece a un equipo pero no al otro
+        UsuarioData usuario = addUsuarioBD("user@umh.es");
+        EquipoData equipoMiembro = equipoService.crearEquipo("Proyecto AAA");
+        EquipoData equipoNoMiembro = equipoService.crearEquipo("Proyecto BBB");
+        equipoService.añadirUsuarioAEquipo(equipoMiembro.getId(), usuario.getId());
+        when(managerUserSession.usuarioLogeado()).thenReturn(usuario.getId());
+
+        // WHEN, THEN
+        // Aparece el botón de salir en su equipo y el de unirse en el otro
+        this.mockMvc.perform(get("/equipos"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(allOf(
+                        containsString("action=\"/equipos/" + equipoMiembro.getId() + "/salir\""),
+                        containsString("action=\"/equipos/" + equipoNoMiembro.getId() + "/unirme\""),
+                        not(containsString("action=\"/equipos/" + equipoMiembro.getId() + "/unirme\"")),
+                        not(containsString("action=\"/equipos/" + equipoNoMiembro.getId() + "/salir\"")))));
+    }
+
+    @Test
+    public void unirmeYSalirNoAccesibleSinLogin() throws Exception {
+        // GIVEN
+        EquipoData equipo = equipoService.crearEquipo("Proyecto AAA");
+        when(managerUserSession.usuarioLogeado()).thenReturn(null);
+
+        // WHEN, THEN
+        this.mockMvc.perform(post("/equipos/" + equipo.getId() + "/unirme"))
+                .andExpect(status().isUnauthorized());
+        this.mockMvc.perform(post("/equipos/" + equipo.getId() + "/salir"))
                 .andExpect(status().isUnauthorized());
     }
 }

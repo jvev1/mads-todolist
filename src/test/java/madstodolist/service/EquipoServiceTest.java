@@ -42,6 +42,19 @@ public class EquipoServiceTest {
     }
 
     @Test
+    public void modificarNombreEquipo() {
+        // GIVEN
+        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+
+        // WHEN
+        EquipoData equipoModificado = equipoService.modificarNombreEquipo(equipo.getId(), "Proyecto 2");
+
+        // THEN
+        assertThat(equipoModificado.getNombre()).isEqualTo("Proyecto 2");
+        assertThat(equipoService.recuperarEquipo(equipo.getId()).getNombre()).isEqualTo("Proyecto 2");
+    }
+
+    @Test
     public void listadoEquiposOrdenAlfabetico() {
         // GIVEN
         // Dos equipos en la base de datos

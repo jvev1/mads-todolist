@@ -42,6 +42,13 @@ public class EquipoService {
         return modelMapper.map(equipo, EquipoData.class);
     }
 
+    @Transactional
+    public EquipoData modificarNombreEquipo(Long idEquipo, String nuevoNombre) {
+        Equipo equipo = getEquipoOrThrow(idEquipo);
+        equipo.setNombre(nuevoNombre);
+        return modelMapper.map(equipo, EquipoData.class);
+    }
+
     @Transactional(readOnly = true)
     public List<EquipoData> findAllOrdenadoPorNombre() {
         return equipoRepository.findAll().stream()

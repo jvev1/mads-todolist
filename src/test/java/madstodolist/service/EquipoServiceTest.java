@@ -32,6 +32,16 @@ public class EquipoServiceTest {
     }
 
     @Test
+    public void crearEquipoNombreVacioLanzaExcepcion() {
+        assertThatThrownBy(() -> equipoService.crearEquipo(""))
+                .isInstanceOf(EquipoServiceException.class);
+        assertThatThrownBy(() -> equipoService.crearEquipo("   "))
+                .isInstanceOf(EquipoServiceException.class);
+        assertThatThrownBy(() -> equipoService.crearEquipo(null))
+                .isInstanceOf(EquipoServiceException.class);
+    }
+
+    @Test
     public void listadoEquiposOrdenAlfabetico() {
         // GIVEN
         // Dos equipos en la base de datos

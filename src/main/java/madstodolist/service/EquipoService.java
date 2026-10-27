@@ -38,12 +38,8 @@ public class EquipoService {
 
     @Transactional(readOnly = true)
     public EquipoData recuperarEquipo(Long id) {
-        Equipo equipo = equipoRepository.findById(id).orElse(null);
-        if (equipo == null)
-            throw new EquipoServiceException("No existe el equipo con id " + id);
-        else {
-            return modelMapper.map(equipo, EquipoData.class);
-        }
+        Equipo equipo = getEquipoOrThrow(id);
+        return modelMapper.map(equipo, EquipoData.class);
     }
 
     @Transactional(readOnly = true)
@@ -56,12 +52,8 @@ public class EquipoService {
 
     @Transactional
     public void añadirUsuarioAEquipo(Long idEquipo, Long idUsuario) {
-        Equipo equipo = equipoRepository.findById(idEquipo).orElse(null);
-        if (equipo == null)
-            throw new EquipoServiceException("No existe el equipo con id " + idEquipo);
-        Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
-        if (usuario == null)
-            throw new EquipoServiceException("No existe el usuario con id " + idUsuario);
+        Equipo equipo = getEquipoOrThrow(idEquipo);
+        Usuario usuario = getUsuarioOrThrow(idUsuario);
         if (equipo.getUsuarios().contains(usuario))
             throw new EquipoServiceException("El usuario " + idUsuario + " ya pertenece al equipo " + idEquipo);
         equipo.addUsuario(usuario);
@@ -69,12 +61,8 @@ public class EquipoService {
 
     @Transactional
     public void eliminarUsuarioDeEquipo(Long idEquipo, Long idUsuario) {
-        Equipo equipo = equipoRepository.findById(idEquipo).orElse(null);
-        if (equipo == null)
-            throw new EquipoServiceException("No existe el equipo con id " + idEquipo);
-        Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
-        if (usuario == null)
-            throw new EquipoServiceException("No existe el usuario con id " + idUsuario);
+        Equipo equipo = getEquipoOrThrow(idEquipo);
+        Usuario usuario = getUsuarioOrThrow(idUsuario);
         if (!equipo.getUsuarios().contains(usuario))
             throw new EquipoServiceException("El usuario " + idUsuario + " no pertenece al equipo " + idEquipo);
         equipo.removeUsuario(usuario);
@@ -82,9 +70,7 @@ public class EquipoService {
 
     @Transactional(readOnly = true)
     public List<UsuarioData> usuariosEquipo(Long id) {
-        Equipo equipo = equipoRepository.findById(id).orElse(null);
-        if (equipo == null)
-            throw new EquipoServiceException("No existe el equipo con id " + id);
+        Equipo equipo = getEquipoOrThrow(id);
         // Hacemos uso de Java Stream API para mapear la lista de entidades a DTOs.
         return equipo.getUsuarios().stream()
                 .map(usuario -> modelMapper.map(usuario, UsuarioData.class))
@@ -93,11 +79,19 @@ public class EquipoService {
 
     @Transactional(readOnly = true)
     public List<EquipoData> equiposUsuario(Long idUsuario) {
-        Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
-        if (usuario == null)
-            throw new EquipoServiceException("No existe el usuario con id " + idUsuario);
+        Usuario usuario = getUsuarioOrThrow(idUsuario);
         return usuario.getEquipos().stream()
                 .map(equipo -> modelMapper.map(equipo, EquipoData.class))
                 .collect(Collectors.toList());
+    }
+
+    private Equipo getEquipoOrThrow(Long idEquipo) {
+        return equipoRepository.findById(idEquipo)
+                .orElseThrow(() -> new EquipoServiceException("No existe el equipo con id " + idEquipo));
+    }
+
+    private Usuario getUsuarioOrThrow(Long idUsuario) {
+        return usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new EquipoServiceException("No existe el usuario con id " + idUsuario));
     }
 }

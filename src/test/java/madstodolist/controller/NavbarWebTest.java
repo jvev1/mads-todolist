@@ -60,6 +60,27 @@ public class NavbarWebTest {
     }
 
     @Test
+    public void conSesionNavbarMuestraEnlaceEquipos() throws Exception {
+        // GIVEN
+        // Sesión con idUsuarioLogeado y nombreUsuarioLogeado
+        // WHEN, THEN
+        // GET /about devuelve HTML con el enlace a Equipos
+        this.mockMvc.perform(get("/about")
+                        .sessionAttr("idUsuarioLogeado", 1L)
+                        .sessionAttr("nombreUsuarioLogeado", "Juan"))
+                .andExpect(content().string(containsString("href=\"/equipos\"")));
+    }
+
+    @Test
+    public void sinSesionNavbarNoMuestraEnlaceEquipos() throws Exception {
+        // GIVEN - usuario no logeado
+        // WHEN, THEN
+        // GET /about devuelve HTML sin el enlace a Equipos
+        this.mockMvc.perform(get("/about"))
+                .andExpect(content().string(not(containsString("href=\"/equipos\""))));
+    }
+
+    @Test
     public void conSesionNavbarNoMuestraLoginNiRegistro() throws Exception {
         // GIVEN
         // Sesión con idUsuarioLogeado y nombreUsuarioLogeado

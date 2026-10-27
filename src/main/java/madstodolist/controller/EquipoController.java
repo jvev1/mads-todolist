@@ -24,10 +24,19 @@ public class EquipoController {
     @Autowired
     ManagerUserSession managerUserSession;
 
-    private void comprobarUsuarioLogeado() {
+    private Long comprobarUsuarioLogeado() {
         Long idUsuarioLogeado = managerUserSession.usuarioLogeado();
         if (idUsuarioLogeado == null)
             throw new UsuarioNoLogeadoException();
+        return idUsuarioLogeado;
+    }
+
+    private void comprobarEquipoExiste(Long idEquipo) {
+        try {
+            equipoService.recuperarEquipo(idEquipo);
+        } catch (EquipoServiceException e) {
+            throw new EquipoNotFoundException();
+        }
     }
 
     @GetMapping("/equipos")
@@ -65,6 +74,32 @@ public class EquipoController {
             return "redirect:/equipos/nuevo";
         }
         flash.addFlashAttribute("mensaje", "Equipo creado correctamente");
+        return "redirect:/equipos";
+    }
+
+    @PostMapping("/equipos/{id}/unirme")
+    public String unirmeAEquipo(@PathVariable(value="id") Long idEquipo, RedirectAttributes flash) {
+        Long idUsuario = comprobarUsuarioLogeado();
+        comprobarEquipoExiste(idEquipo);
+        try {
+            equipoService.añadirUsuarioAEquipo(idEquipo, idUsuario);
+            flash.addFlashAttribute("mensaje", "Te has unido al equipo");
+        } catch (EquipoServiceException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/equipos";
+    }
+
+    @PostMapping("/equipos/{id}/salir")
+    public String salirDeEquipo(@PathVariable(value="id") Long idEquipo, RedirectAttributes flash) {
+        Long idUsuario = comprobarUsuarioLogeado();
+        comprobarEquipoExiste(idEquipo);
+        try {
+            equipoService.eliminarUsuarioDeEquipo(idEquipo, idUsuario);
+            flash.addFlashAttribute("mensaje", "Has salido del equipo");
+        } catch (EquipoServiceException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/equipos";
     }
 }

@@ -195,6 +195,17 @@ public class EquipoServiceTest {
     }
 
     @Test
+    public void borrarEquipoInexistenteLanzaExcepcion() {
+        // GIVEN
+        EquipoData equipo = equipoService.crearEquipo("Proyecto 1");
+
+        // WHEN, THEN
+        assertThatThrownBy(() -> equipoService.borrarEquipo(equipo.getId() + 1))
+                .isInstanceOf(EquipoServiceException.class);
+        assertThat(equipoService.findAllOrdenadoPorNombre()).hasSize(1);
+    }
+
+    @Test
     public void eliminarUsuarioDeEquipoExcepciones() {
         // No existe ni el equipo ni el usuario
         assertThatThrownBy(() -> equipoService.eliminarUsuarioDeEquipo(1L, 1L))

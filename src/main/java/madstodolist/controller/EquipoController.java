@@ -41,8 +41,9 @@ public class EquipoController {
 
     @GetMapping("/equipos")
     public String listadoEquipos(Model model) {
-        comprobarUsuarioLogeado();
+        Long idUsuario = comprobarUsuarioLogeado();
         model.addAttribute("equipos", equipoService.findAllOrdenadoPorNombre());
+        model.addAttribute("equiposUsuario", equipoService.equiposUsuario(idUsuario));
         return "listaEquipos";
     }
 

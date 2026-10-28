@@ -36,8 +36,11 @@
                               th:action="@{/equipos/{id}/salir(id=${equipo.id})}">
                             <button class="btn btn-danger btn-sm" type="submit">Salir</button>
                         </form>
-                        <button class="btn btn-danger btn-sm" onmouseover="" style="cursor: pointer;"
-                                th:onclick="'del(\'/equipos/' + ${equipo.id} + '\')'">Borrar</button>
+                        <th:block th:if="${esAdmin}">
+                            <a class="btn btn-primary btn-sm" th:href="@{/equipos/{id}/editar(id=${equipo.id})}">Editar</a>
+                            <button class="btn btn-danger btn-sm" onmouseover="" style="cursor: pointer;"
+                                    th:onclick="'del(\'/equipos/' + ${equipo.id} + '\')'">Borrar</button>
+                        </th:block>
                     </td>
                 </tr>
                 </tbody>

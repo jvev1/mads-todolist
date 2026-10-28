@@ -2,10 +2,13 @@ package madstodolist.controller;
 
 import madstodolist.authentication.ManagerUserSession;
 import madstodolist.controller.exception.EquipoNotFoundException;
+import madstodolist.controller.exception.UsuarioNoAutorizadoException;
 import madstodolist.controller.exception.UsuarioNoLogeadoException;
 import madstodolist.dto.EquipoData;
+import madstodolist.dto.UsuarioData;
 import madstodolist.service.EquipoService;
 import madstodolist.service.EquipoServiceException;
+import madstodolist.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +27,9 @@ public class EquipoController {
     EquipoService equipoService;
 
     @Autowired
+    UsuarioService usuarioService;
+
+    @Autowired
     ManagerUserSession managerUserSession;
 
     private Long comprobarUsuarioLogeado() {
@@ -31,6 +37,17 @@ public class EquipoController {
         if (idUsuarioLogeado == null)
             throw new UsuarioNoLogeadoException();
         return idUsuarioLogeado;
+    }
+
+    private boolean esAdministrador(Long idUsuario) {
+        UsuarioData usuario = usuarioService.findById(idUsuario);
+        return usuario != null && usuario.isAdmin();
+    }
+
+    private void comprobarUsuarioAdministrador() {
+        Long idUsuarioLogeado = comprobarUsuarioLogeado();
+        if (!esAdministrador(idUsuarioLogeado))
+            throw new UsuarioNoAutorizadoException();
     }
 
     private void comprobarEquipoExiste(Long idEquipo) {
@@ -46,6 +63,7 @@ public class EquipoController {
         Long idUsuario = comprobarUsuarioLogeado();
         model.addAttribute("equipos", equipoService.findAllOrdenadoPorNombre());
         model.addAttribute("equiposUsuario", equipoService.equiposUsuario(idUsuario));
+        model.addAttribute("esAdmin", esAdministrador(idUsuario));
         return "listaEquipos";
     }
 
@@ -83,7 +101,7 @@ public class EquipoController {
     @GetMapping("/equipos/{id}/editar")
     public String formEditarEquipo(@PathVariable(value="id") Long idEquipo, @ModelAttribute EquipoData equipoData,
                                    Model model) {
-        comprobarUsuarioLogeado();
+        comprobarUsuarioAdministrador();
         try {
             EquipoData equipo = equipoService.recuperarEquipo(idEquipo);
             model.addAttribute("equipo", equipo);
@@ -97,7 +115,7 @@ public class EquipoController {
     @PostMapping("/equipos/{id}/editar")
     public String grabarEquipoModificado(@PathVariable(value="id") Long idEquipo, @ModelAttribute EquipoData equipoData,
                                          RedirectAttributes flash) {
-        comprobarUsuarioLogeado();
+        comprobarUsuarioAdministrador();
         comprobarEquipoExiste(idEquipo);
         try {
             equipoService.modificarNombreEquipo(idEquipo, equipoData.getNombre());
@@ -112,7 +130,7 @@ public class EquipoController {
     @DeleteMapping("/equipos/{id}")
     @ResponseBody
     public String borrarEquipo(@PathVariable(value="id") Long idEquipo) {
-        comprobarUsuarioLogeado();
+        comprobarUsuarioAdministrador();
         try {
             equipoService.borrarEquipo(idEquipo);
         } catch (EquipoServiceException e) {

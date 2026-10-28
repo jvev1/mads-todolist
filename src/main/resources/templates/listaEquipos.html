@@ -36,6 +36,8 @@
                               th:action="@{/equipos/{id}/salir(id=${equipo.id})}">
                             <button class="btn btn-danger btn-sm" type="submit">Salir</button>
                         </form>
+                        <button class="btn btn-danger btn-sm" onmouseover="" style="cursor: pointer;"
+                                th:onclick="'del(\'/equipos/' + ${equipo.id} + '\')'">Borrar</button>
                     </td>
                 </tr>
                 </tbody>
@@ -63,6 +65,17 @@
 </div>
 
 <div th:replace="fragments::javascript"/>
+
+
+<script type="text/javascript">
+    function del(urlBorrar) {
+        if (confirm('¿Estás seguro/a de que quieres borrar el equipo?')) {
+            fetch(urlBorrar, {
+                method: 'DELETE'
+            }).then((res) => location.reload());
+        }
+    }
+</script>
 
 </body>
 </html>

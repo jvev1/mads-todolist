@@ -4,12 +4,9 @@ Resumen de lo hecho en las funcionalidades 009 (pertenencia a equipos) y 010 (ge
 
 ## Base de datos
 
-Tablas en PostgreSQL vistas desde el panel Database de IntelliJ. La relación entre equipos y usuarios se guarda en `equipo_usuario`.
+Tablas de la base de datos PostgreSQL vistas desde el panel Database de IntelliJ: `equipos`, `equipo_usuario`, `usuarios` y `tareas`. La relación entre equipos y usuarios se guarda en `equipo_usuario`.
 
-![equipos](captura-equipos.png)
-![equipo_usuario](captura-equipo_usuario.png)
-![usuarios](captura-usuarios.png)
-![tareas](captura-tareas.png)
+![Base de datos](database.png)
 
 ## Endpoints
 

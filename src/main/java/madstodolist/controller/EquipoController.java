@@ -78,6 +78,35 @@ public class EquipoController {
         return "redirect:/equipos";
     }
 
+    @GetMapping("/equipos/{id}/editar")
+    public String formEditarEquipo(@PathVariable(value="id") Long idEquipo, @ModelAttribute EquipoData equipoData,
+                                   Model model) {
+        comprobarUsuarioLogeado();
+        try {
+            EquipoData equipo = equipoService.recuperarEquipo(idEquipo);
+            model.addAttribute("equipo", equipo);
+            equipoData.setNombre(equipo.getNombre());
+        } catch (EquipoServiceException e) {
+            throw new EquipoNotFoundException();
+        }
+        return "formEditarEquipo";
+    }
+
+    @PostMapping("/equipos/{id}/editar")
+    public String grabarEquipoModificado(@PathVariable(value="id") Long idEquipo, @ModelAttribute EquipoData equipoData,
+                                         RedirectAttributes flash) {
+        comprobarUsuarioLogeado();
+        comprobarEquipoExiste(idEquipo);
+        try {
+            equipoService.modificarNombreEquipo(idEquipo, equipoData.getNombre());
+        } catch (EquipoServiceException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+            return "redirect:/equipos/" + idEquipo + "/editar";
+        }
+        flash.addFlashAttribute("mensaje", "Equipo modificado correctamente");
+        return "redirect:/equipos";
+    }
+
     @PostMapping("/equipos/{id}/unirme")
     public String unirmeAEquipo(@PathVariable(value="id") Long idEquipo, RedirectAttributes flash) {
         Long idUsuario = comprobarUsuarioLogeado();
